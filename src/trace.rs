@@ -52,15 +52,6 @@ pub struct Config {
     pub samples_per_pixel: u32,
 }
 
-// Mostly copy-paste from glium documentation: define a Data type, which stores u32s,
-// make it implement the right traits
-struct Data {
-    values: [[f32; 4]],
-}
-
-implement_buffer_content!(Data);
-implement_uniform_block!(Data, values);
-
 pub fn render(ctx: &Context, cfg: &Config, scene: &Scene) {
     let mut ray_dirs = Vec::new();
     ray_dirs.reserve((cfg.width * cfg.height) as usize);
@@ -72,14 +63,10 @@ pub fn render(ctx: &Context, cfg: &Config, scene: &Scene) {
             ray_dirs.push(ray_dir);
         }
     }
-    ray_dirs.push(Vector3::new(1.0, 2.0, 3.0));
-    ray_dirs.push(Vector3::new(2.0, 4.0, 5.0));
-    ray_dirs.push(Vector3::new(1.0, 1.0, 1.0));
-    ray_dirs.push(Vector3::new(1.0, 1.0, 1.0));
     
     // set buffers
-    let mut buffer: UniformBuffer<Data> =
-        UniformBuffer::empty_unsized(&ctx.display, ray_dirs.len() * 4 * 4).unwrap();
+    let mut buffer: UniformBuffer<[[f32; 4]]> =
+        UniformBuffer::empty_unsized(&ctx.display, ray_dirs.len()*4*4).unwrap();
 
     //let mut buffer: UniformBuffer<Data> = UniformBuffer::empty(&ctx.display).unwrap();
 
@@ -87,11 +74,11 @@ pub fn render(ctx: &Context, cfg: &Config, scene: &Scene) {
         let mut mapping = buffer.map();
         for i in 0..ray_dirs.len() {
             let ray_dir = ray_dirs[i];
-            mapping.values[i] = [ray_dir.x, ray_dir.y, ray_dir.z, -1.0];
+            mapping[i] = [ray_dir.x, ray_dir.y, ray_dir.z, -1.0];
         }
     }
 
-    ctx.cs_intersect.execute(uniform! { MyBlock: &*buffer }, ray_dirs.len() as u32, 1, 1);
+    ctx.cs_intersect.execute(uniform! { RayDirections: &*buffer }, ray_dirs.len() as u32, 1, 1);
 
     // calculate intersection
     // calculate shading
@@ -99,7 +86,7 @@ pub fn render(ctx: &Context, cfg: &Config, scene: &Scene) {
     {
         let mapping = buffer.map();
         let img: RgbImage = ImageBuffer::from_fn(cfg.width, cfg.height, |x, y| {
-            let col = mapping.values[(y * cfg.width + x) as usize];
+            let col = mapping[(y * cfg.width + x) as usize];
             image::Rgb([(col[0]*255.0) as u8, (col[1]*255.0)as u8, (col[2]*255.0) as u8])
         });
         img.save("out.png").expect("Failed to save image");

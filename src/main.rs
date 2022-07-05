@@ -13,8 +13,8 @@ fn main() {
         cam_rot: Quaternion::one()
     };
     let cfg = Config {
-        width: 100,
-        height: 100,
+        width: 1024,
+        height: 1024,
         min_bounces: 0,
         max_bounces: 3,
         samples_per_pixel: 1

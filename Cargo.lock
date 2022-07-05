@@ -507,7 +507,7 @@ dependencies = [
 [[package]]
 name = "glium"
 version = "0.31.0"
-source = "git+https://github.com/pema99/glium?branch=sizeof-workaround#a5a5c1e9eb42c619fd742aaf7479b45e23d40a9a"
+source = "git+https://github.com/glium/glium#cddc1f9188cc9b36b576df02813bbb3473dbedde"
 dependencies = [
  "backtrace",
  "fnv",
