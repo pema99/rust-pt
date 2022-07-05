@@ -1,0 +1,11 @@
+[package]
+name = "rust-pt"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+glium = { git = "https://github.com/pema99/glium", branch="sizeof-workaround" }
+glutin = "0.28"
+cgmath = "0.18.0"
+rand = "*"
+image = "0.24.2"
