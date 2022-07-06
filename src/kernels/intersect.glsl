@@ -4,7 +4,22 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 buffer RayDirections { vec4 rayDirections[]; };
 
 float map(vec3 p) {
-    return length(p - vec3(0., 0., 1.)) - 1;
+    // metaball
+    float d = length(p + vec3(0.4, 0.5, -0.5)) - 0.5;
+    d = min(d, length(p + vec3(0.7, 0.2, -0.3)) - 0.4);
+
+    // ball
+    d = min(d, length(p + vec3(-0.5, 0.5, 0.3)) - 0.5);
+    
+    // walls
+    d = min(d, abs(p.y+1.0));
+    d = min(d, abs(p.y-1.0));
+    d = min(d, abs(p.x+1.5));
+    d = min(d, abs(p.x-1.5));
+    d = min(d, abs(p.z+3.5));
+    d = min(d, abs(p.z-2.0));
+
+    return d;
 }
 
 vec2 march(vec3 ro, vec3 rd) {
@@ -32,7 +47,7 @@ vec3 normal(vec3 p)
 
 void main() {
     vec4 val = rayDirections[gl_GlobalInvocationID.x];
-    vec3 ro = vec3(0, 0, -1);
+    vec3 ro = vec3(0, 0, -2);
     vec3 rd = val.xyz;
 
     vec2 res = march(ro, rd);

@@ -5,7 +5,9 @@ use glium::texture::{UncompressedFloatFormat, MipmapsOption};
 use glium::{Display, Surface, Program, Texture2d};
 use glium::program::ComputeShader;
 use glium::uniforms::UniformBuffer;
+use glutin::dpi::PhysicalSize;
 use glutin::event_loop::EventLoop;
+use glutin::window::Window;
 use image::{ImageBuffer, RgbImage};
 
 fn import_kernel(display: &Display, path: &str) -> ComputeShader {
@@ -27,7 +29,7 @@ pub struct Context {
 impl Context {
     pub fn new(event_loop: &EventLoop<()>) -> Self {
         // Setup
-        let wb = glutin::window::WindowBuilder::new();
+        let wb = glutin::window::WindowBuilder::new().with_title("rust-pt");
         let cb = glutin::ContextBuilder::new();
         
         let display = glium::Display::new(wb, cb, event_loop).unwrap();
@@ -48,18 +50,19 @@ pub fn main_loop() {
     let ctx = Context::new(&event_loop);
 
     let scene = Scene { 
-        cam_pos: Vector3::new(0.0, 0.0, -1.0),
+        cam_pos: Vector3::new(0.0, 0.0, -3.0),
         cam_rot: Quaternion::one()
     };
     let cfg = Config {
-        width: 1024,
-        height: 1024,
+        width: 512,
+        height: 512,
         min_bounces: 0,
-        max_bounces: 3,
+        max_bounces: 2,
         samples_per_pixel: 1
     };
+    ctx.display.gl_window().window().set_inner_size(PhysicalSize::new(cfg.width, cfg.height));
 
-    // Setup vert buffer
+    // Setup vert buffer for a quad
     #[derive(Copy, Clone)]
     struct Vertex { position: [f32; 2] }
     implement_vertex!(Vertex, position);
