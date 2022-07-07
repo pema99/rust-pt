@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use cgmath::*;
 use glium::texture::{UncompressedFloatFormat, MipmapsOption};
 use glium::{Display, Surface, Program, Texture2d};
@@ -7,7 +5,6 @@ use glium::program::ComputeShader;
 use glium::uniforms::UniformBuffer;
 use glutin::dpi::PhysicalSize;
 use glutin::event_loop::EventLoop;
-use glutin::window::Window;
 use image::{ImageBuffer, RgbImage};
 
 fn import_kernel(display: &Display, path: &str) -> ComputeShader {
@@ -111,7 +108,7 @@ pub fn main_loop() {
         let next_frame_time = std::time::Instant::now() +
         std::time::Duration::from_nanos(16_666_667);
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
-
+        render(&ctx, &cfg, &scene, &framebuffer);
         // Draw current result
         let mut target = ctx.display.draw();
         target.clear_color(0.0, 0.0, 0.0, 1.0);
@@ -149,8 +146,6 @@ pub fn render(ctx: &Context, cfg: &Config, scene: &Scene, tar: &Texture2d) {
     let mut buffer: UniformBuffer<[[f32; 4]]> =
         UniformBuffer::empty_unsized(&ctx.display, ray_dirs.len()*4*4).unwrap();
 
-    //let mut buffer: UniformBuffer<Data> = UniformBuffer::empty(&ctx.display).unwrap();
-
     {
         let mut mapping = buffer.map();
         for i in 0..ray_dirs.len() {
@@ -159,7 +154,7 @@ pub fn render(ctx: &Context, cfg: &Config, scene: &Scene, tar: &Texture2d) {
         }
     }
 
-    ctx.cs_intersect.execute(uniform! { RayDirections: &*buffer }, ray_dirs.len() as u32, 1, 1);
+    ctx.cs_intersect.execute(uniform! { RayDirections: &*buffer }, ray_dirs.len() as u32 / 64, 1, 1);
 
     // calculate intersection
     // calculate shading
